@@ -4,6 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
+        <Compile Include="Watcher.fs" />
         <Compile Include="ProjectCracker.fs" />
         <Compile Include="CodeModel.fs" />
         <Compile Include="Interpreter.fs" />

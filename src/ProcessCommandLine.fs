@@ -13,6 +13,7 @@ open System.IO
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open System.Net
 open System.Text
+open ChangeWatcher
 
 
 let checker = FSharpChecker.Create(keepAssemblyContents = true)
@@ -436,12 +437,9 @@ let ProcessCommandLine (argv: string[]) =
                 changed "initial" ()
 
         let mkWatcher (path, fileName) = 
-            let watcher = new FileSystemWatcher(path, fileName)
-            watcher.NotifyFilter <- NotifyFilters.Attributes ||| NotifyFilters.CreationTime ||| NotifyFilters.FileName ||| NotifyFilters.LastAccess ||| NotifyFilters.LastWrite ||| NotifyFilters.Size ||| NotifyFilters.Security;
-            watcher.Changed.Add (changed "Changed")
-            watcher.Created.Add (changed "Created")
-            watcher.Deleted.Add (changed "Deleted")
-            watcher.Renamed.Add (changed "Renamed")
+            let options = { IncludeSubdirectories = true }
+            let watcher = ChangeWatcher.runWithOptions options (changed "Just because") path
+            
             watcher
 
         let watchers = 
@@ -455,13 +453,13 @@ let ProcessCommandLine (argv: string[]) =
                     printfn "fscd: WATCHING %s in %s" editFile infoDir 
                     yield mkWatcher (infoDir, Path.GetFileName editFile) ]
 
-        for watcher in watchers do
-            watcher.EnableRaisingEvents <- true
+        // for watcher in watchers do
+        //     watcher.EnableRaisingEvents <- true
 
         printfn "Waiting for changes... press any key to exit" 
         System.Console.ReadLine() |> ignore
         for watcher in watchers do
-            watcher.EnableRaisingEvents <- false
+            watcher.Dispose()
 
     else
         changed "once" ()
