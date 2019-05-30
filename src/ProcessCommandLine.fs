@@ -436,22 +436,22 @@ let ProcessCommandLine (argv: string[]) =
             for sourceFile in options.SourceFiles do
                 changed "initial" ()
 
-        let mkWatcher (path, fileName) = 
+        let mkWatcher path = 
             let options = { IncludeSubdirectories = true }
             let watcher = ChangeWatcher.runWithOptions options (changed "Just because") path
             
             watcher
 
-        let watchers = 
-            [ for sourceFile in options.SourceFiles do
-                let path = Path.GetDirectoryName(sourceFile)
-                let fileName = Path.GetFileName(sourceFile)
-                printfn "fscd: WATCHING %s in %s" fileName path 
-                yield mkWatcher (path, fileName)
-                if useEditFiles then 
-                    let infoDir, editFile = editDirAndFile fileName
-                    printfn "fscd: WATCHING %s in %s" editFile infoDir 
-                    yield mkWatcher (infoDir, Path.GetFileName editFile) ]
+        let watchers = [ mkWatcher (Path.GetDirectoryName(options.ProjectFileName)) ]
+//            [ for sourceFile in options.SourceFiles do
+//                let path = Path.GetDirectoryName(sourceFile)
+//                let fileName = Path.GetFileName(sourceFile)
+//                printfn "fscd: WATCHING %s in %s" fileName path 
+//                yield mkWatcher (path, fileName)
+//                if useEditFiles then 
+//                    let infoDir, editFile = editDirAndFile fileName
+//                    printfn "fscd: WATCHING %s in %s" editFile infoDir 
+//                    yield mkWatcher (infoDir, Path.GetFileName editFile) ]
 
         // for watcher in watchers do
         //     watcher.EnableRaisingEvents <- true
